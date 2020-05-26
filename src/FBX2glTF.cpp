@@ -331,6 +331,35 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+  // See if we want to scale uvs
+  bool world_scale_uvs = false;
+  for (int i = 0; i < raw.GetNodeCount() && !world_scale_uvs; i++) {
+    const RawNode& node = raw.GetNode(i);
+    for (auto& s: node.userProperties) {
+      auto prop = json::parse(s);
+      auto key = prop.begin().key();
+      if (StringUtils::CompareNoCase(key, "scaleUvs")) {
+        world_scale_uvs = prop[key]["value"] == 1;
+        break;
+      }
+    }
+  }
+
+  if (world_scale_uvs) {
+    Vec3f v_min(std::numeric_limits<float>::max());
+    Vec3f v_max(std::numeric_limits<float>::lowest());
+    for (int i = 0; i < raw.GetVertexCount(); i++) {
+      auto v = raw.GetVertex(i);
+      v_min = Vec3f::Min(v_min, v.position);
+      v_max = Vec3f::Max(v_max, v.position);
+    }
+    auto dims = v_max - v_min;
+    auto maxDim = std::max(dims.x, std::max(dims.y, dims.z));
+    texturesTransforms.emplace_back([maxDim](Vec2f uv) {
+      return Vec2f(uv[0] * maxDim, uv[1] * maxDim);
+    });
+  }
+
   if (!texturesTransforms.empty()) {
     raw.TransformTextures(texturesTransforms);
   }
