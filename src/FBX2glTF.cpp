@@ -338,7 +338,7 @@ int main(int argc, char* argv[]) {
     for (auto& s: node.userProperties) {
       auto prop = json::parse(s);
       auto key = prop.begin().key();
-      if (StringUtils::CompareNoCase(key, "scaleUvs")) {
+      if (StringUtils::CompareNoCase(key, "scaleUV")) {
         world_scale_uvs = prop[key]["value"] == 1;
         break;
       }
