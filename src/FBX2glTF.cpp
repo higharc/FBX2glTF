@@ -338,8 +338,9 @@ int main(int argc, char* argv[]) {
     for (auto& s: node.userProperties) {
       auto prop = json::parse(s);
       auto key = prop.begin().key();
-      if (StringUtils::CompareNoCase(key, "scaleUV")) {
+      if (StringUtils::CompareNoCase(key, "scaleUV") == 0) {
         world_scale_uvs = prop[key]["value"] == 1;
+        fmt::printf("Found scale uv, set to: %s %s", world_scale_uvs ? "true" : "false", s.c_str());
         break;
       }
     }
@@ -355,6 +356,7 @@ int main(int argc, char* argv[]) {
     }
     auto dims = v_max - v_min;
     auto maxDim = std::max(dims.x, std::max(dims.y, dims.z));
+    maxDim *= 100.0f / 2.54f;
     texturesTransforms.emplace_back([maxDim](Vec2f uv) {
       return Vec2f(uv[0] * maxDim, uv[1] * maxDim);
     });
